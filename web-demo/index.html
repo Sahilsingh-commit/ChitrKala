@@ -62,8 +62,13 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
   @media (max-width: 768px) {
-    .grid-2 { grid-template-columns: 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
   }
 
   button {
@@ -95,6 +100,7 @@
     font-weight: 500;
   }
   audio { width: 100%; margin-top: 10px; }
+
   .warning-box {
     color: #856404;
     background: #fff3cd;
@@ -103,6 +109,15 @@
     border-radius: 6px;
     font-size: 13px;
     margin-bottom: 12px;
+  }
+  .amber-box {
+    color: #856404;
+    background: #fff8e6;
+    border: 1px solid #fce8b2;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 10px;
   }
   .error-box {
     color: #721c24;
@@ -114,7 +129,70 @@
     margin-top: 12px;
   }
 
-  select, input[type="file"] {
+  /* Handmade Badge */
+  .handmade-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #e6f4ea;
+    color: #137333;
+    border: 1px solid #ceead6;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  /* Pricing Presets */
+  .preset-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .preset-btn {
+    flex: 1;
+    min-width: 110px;
+    padding: 10px 8px;
+    border-radius: 8px;
+    border: 2px solid #e0e0d8;
+    background: #f9f9f6;
+    font-size: 13px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .preset-btn.active {
+    border-color: #d85a30;
+    background: #fff3ed;
+    color: #c24d26;
+    font-weight: 700;
+  }
+  .preset-label { font-size: 11px; text-transform: uppercase; color: #777; display: block; margin-bottom: 2px; }
+  .preset-amount { font-size: 15px; font-weight: 700; }
+
+  .artisan-marker {
+    display: inline-block;
+    background: #e8f0fe;
+    color: #1a73e8;
+    border: 1px solid #c2e7ff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  .reasoning-list {
+    margin: 8px 0 0 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.5;
+  }
+
+  select, input[type="file"], input[type="number"], input[type="text"] {
     width: 100%;
     padding: 9px 12px;
     border-radius: 6px;
@@ -165,7 +243,7 @@
 
 <header>
   <h1>ChitrKala - Artisan AI Studio & Auto-Cataloger</h1>
-  <p class="sub">Unified local AI workspace: Photo to E-Commerce Studio + Regional Voice Note to Bilingual SEO Listing.</p>
+  <p class="sub">Unified local AI workspace: Photo to E-Commerce Studio + Regional Voice Note to Bilingual SEO Listing & Pricing Engine.</p>
 </header>
 
 <div class="tabs">
@@ -175,12 +253,12 @@
 </div>
 
 <!-- ==================================================== -->
-<!-- SECTION 1: UNIFIED FLOW (IMAGE + VOICE IN ONE FORM) -->
+<!-- SECTION 1: UNIFIED FLOW (IMAGE + VOICE + PRICING)   -->
 <!-- ==================================================== -->
 <div id="unified" class="section-panel active">
   <div class="card">
     <h3>Create Full E-Commerce Listing</h3>
-    <p style="font-size:14px; color:#666; margin-bottom:20px;">Upload a product photo and record a voice description. The backend processes both concurrently.</p>
+    <p style="font-size:14px; color:#666; margin-bottom:20px;">Upload a product photo, record a voice description, and specify craft parameters.</p>
 
     <div class="grid-2">
       <!-- Left Column: Product Photo -->
@@ -198,15 +276,40 @@
             <option value="transparent">Transparent PNG (No Background)</option>
           </select>
         </div>
+
+        <div class="field">
+          <label>Expected Price (₹ INR, Optional)</label>
+          <input type="number" id="uExpectedPrice" placeholder="e.g. 5000 (Your price idea)" min="0" />
+        </div>
       </div>
 
-      <!-- Right Column: Voice Note -->
+      <!-- Right Column: Voice Note & Craft Info -->
       <div>
         <div class="field">
           <label>2. Product Voice Note (Any Language)</label>
           <button id="uRecordBtn" class="record" style="width:100%;">🎙️ Start Recording Voice Note</button>
           <div id="uVoiceStatus" class="status" style="font-size:12px;"></div>
           <audio id="uPlayback" controls style="display:none"></audio>
+        </div>
+
+        <div class="grid-2" style="gap:10px;">
+          <div class="field">
+            <label>Build Duration</label>
+            <select id="uBuildTime">
+              <option value="1–3 days">1–3 days</option>
+              <option value="Under 1 day">Under 1 day</option>
+              <option value="4–7 days">4–7 days</option>
+              <option value="Over 1 week">Over 1 week</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Craft Type</label>
+            <label style="display:flex; align-items:center; gap:8px; margin-top:8px; cursor:pointer; font-size:14px; text-transform:none; color:#333;">
+              <input type="checkbox" id="uIsHandmade" checked style="width:auto;" />
+              Fully Handmade
+            </label>
+          </div>
         </div>
 
         <div class="field">
@@ -222,7 +325,7 @@
     <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;" />
 
     <button id="uSubmitBtn" class="primary" style="width:100%; font-size:16px; padding:14px;">
-      🚀 Generate Full E-Commerce Listing (Studio Image + Bilingual Catalog)
+      🚀 Generate Full E-Commerce Listing (Studio Image + Bilingual Catalog + Pricing)
     </button>
     <div id="uGlobalStatus" class="status"></div>
   </div>
@@ -240,6 +343,7 @@
 
     <!-- Bilingual Listing Details Column -->
     <div class="card" style="margin-top:0;">
+      <div id="uHandmadeBadgeContainer"></div>
       <h3 style="margin-top:0;">Bilingual Catalog & SEO Listing</h3>
       <div id="uListingContainer"></div>
     </div>
@@ -312,6 +416,7 @@ const uResultView = document.getElementById("uResultView");
 const uDownloadBtn = document.getElementById("uDownloadBtn");
 const uListingContainer = document.getElementById("uListingContainer");
 const uImageContainer = document.getElementById("uImageContainer");
+const uHandmadeBadgeContainer = document.getElementById("uHandmadeBadgeContainer");
 
 const BACKEND_UNIFIED_URL = "http://localhost:4000/api/unified-catalog";
 
@@ -364,7 +469,7 @@ uSubmitBtn.addEventListener("click", async () => {
   }
 
   uSubmitBtn.disabled = true;
-  uGlobalStatus.textContent = "Processing image studio & Gemini AI voice cataloging concurrently...";
+  uGlobalStatus.textContent = "Processing image studio, Gemini AI voice cataloging & pricing engine concurrently...";
   uResultView.style.display = "none";
 
   const formData = new FormData();
@@ -376,6 +481,14 @@ uSubmitBtn.addEventListener("click", async () => {
   }
   formData.append("backgroundColor", document.getElementById("uBgColor").value);
   formData.append("enhanceLighting", document.getElementById("uLightingToggle").value);
+
+  // Pricing inputs
+  const expectedVal = document.getElementById("uExpectedPrice").value;
+  if (expectedVal) {
+    formData.append("artisan_expected_price", expectedVal);
+  }
+  formData.append("build_time", document.getElementById("uBuildTime").value);
+  formData.append("is_handmade", document.getElementById("uIsHandmade").checked ? "true" : "false");
 
   try {
     const res = await fetch(BACKEND_UNIFIED_URL, { method: "POST", body: formData });
@@ -409,8 +522,16 @@ function renderUnifiedResult(data) {
     uDownloadBtn.style.display = "none";
   }
 
-  // Render Listing Details
-  if (listing && (listing.title || listing.description_en)) {
+  // Render Handmade Badge (only if is_handmade === true)
+  const isHandmade = listing?.pricing?.is_handmade ?? true;
+  if (isHandmade) {
+    uHandmadeBadgeContainer.innerHTML = `<div class="handmade-badge">✅ Handmade Artisan Craft</div>`;
+  } else {
+    uHandmadeBadgeContainer.innerHTML = "";
+  }
+
+  // Render Listing & Pricing Details
+  if (listing && (listing.title || listing.description_en || listing.pricing)) {
     let warningHtml = "";
     if (listing.listing_error) {
       warningHtml = `<div class="warning-box">⚠️ Voice Note Warning: ${escapeHtml(listing.listing_error)}</div>`;
@@ -420,6 +541,70 @@ function renderUnifiedResult(data) {
       .map((t) => `<span>${escapeHtml(t)}</span>`)
       .join("");
 
+    // Build Pricing Section
+    let pricingHtml = "";
+    if (listing.pricing) {
+      const p = listing.pricing;
+      const rangeLow = p.range_low ? p.range_low.toLocaleString("en-IN") : "0";
+      const rangeHigh = p.range_high ? p.range_high.toLocaleString("en-IN") : "0";
+      const suggested = p.suggested ? p.suggested.toLocaleString("en-IN") : "0";
+
+      let expectedMarkerHtml = "";
+      if (p.artisan_expected_price) {
+        expectedMarkerHtml = `<div class="artisan-marker">Your price idea: ₹${p.artisan_expected_price.toLocaleString("en-IN")}</div>`;
+      }
+
+      let outsideMarketHtml = "";
+      if (p.outside_market_range) {
+        outsideMarketHtml = `
+          <div class="amber-box">
+            💡 <strong>Market Note:</strong> Your price idea (₹${p.artisan_expected_price.toLocaleString("en-IN")}) is outside the typical market benchmark range (₹${rangeLow} – ₹${rangeHigh}).
+          </div>`;
+      }
+
+      const reasoningBullets = (p.reasoning || [])
+        .map((r) => `<li>${escapeHtml(r)}</li>`)
+        .join("");
+
+      pricingHtml = `
+        <div style="background:#fafafa; border:1px solid #e5e5e0; border-radius:10px; padding:16px; margin: 16px 0;">
+          <label style="font-size:11px; color:#888; font-weight:700; text-transform:uppercase; display:block; margin-bottom:6px;">Smart Price Benchmark (${p.tier_used.toUpperCase()} Tier)</label>
+          <div style="font-size:13px; color:#555; margin-bottom:8px;">Estimated Market Range: <strong>₹${rangeLow} – ₹${rangeHigh}</strong></div>
+
+          <div class="preset-container">
+            <div class="preset-btn" onclick="selectFinalPrice(${p.range_low}, this)">
+              <span class="preset-label">Low</span>
+              <span class="preset-amount">₹${rangeLow}</span>
+            </div>
+            <div class="preset-btn active" onclick="selectFinalPrice(${p.suggested}, this)">
+              <span class="preset-label">Recommended</span>
+              <span class="preset-amount">₹${suggested}</span>
+            </div>
+            <div class="preset-btn" onclick="selectFinalPrice(${p.range_high}, this)">
+              <span class="preset-label">High</span>
+              <span class="preset-amount">₹${rangeHigh}</span>
+            </div>
+          </div>
+
+          ${expectedMarkerHtml}
+          ${outsideMarketHtml}
+
+          <div style="margin-top:12px;">
+            <label style="font-size:11px; color:#888; font-weight:700; text-transform:uppercase;">Pricing Reasoning</label>
+            <ul class="reasoning-list">
+              ${reasoningBullets}
+            </ul>
+          </div>
+
+          <div style="margin-top:16px; padding-top:12px; border-top:1px dashed #ddd;">
+            <label style="font-size:12px; font-weight:700; color:#333;">Final Selected Listing Price (₹ INR)</label>
+            <input type="number" id="finalPriceInput" value="${p.suggested}" style="font-size:16px; font-weight:700; color:#2b7a4b; margin-top:4px;" />
+            <div style="font-size:11px; color:#777; margin-top:3px;">This is the price that will be saved with the listing.</div>
+          </div>
+        </div>
+      `;
+    }
+
     uListingContainer.innerHTML = `
       ${warningHtml}
       <div class="field"><label>Detected Language</label><div class="value">${escapeHtml(listing.detected_language || "-")}</div></div>
@@ -427,6 +612,7 @@ function renderUnifiedResult(data) {
       <div class="field"><label>Description (English)</label><div class="value">${escapeHtml(listing.description_en || "-")}</div></div>
       <div class="field"><label>Description (Hindi)</label><div class="value">${escapeHtml(listing.description_hi || "-")}</div></div>
       <div class="field"><label>Category</label><div class="value">${escapeHtml(listing.category || "-")}</div></div>
+      ${pricingHtml}
       <div class="field"><label>SEO Tags</label><div class="tags">${tagsHtml}</div></div>
       <div class="field"><label>AI Confidence</label><div class="value">${Math.round((listing.confidence || 0) * 100)}%</div></div>
       <div class="field"><label>Raw Voice Transcript</label><div class="value" style="color:#888; font-size:13px;">${escapeHtml(listing.transcript || "-")}</div></div>
@@ -435,6 +621,12 @@ function renderUnifiedResult(data) {
     const errText = listing?.listing_error || "No voice note processed";
     uListingContainer.innerHTML = `<div class="warning-box">⚠️ Voice Catalog Warning: ${escapeHtml(errText)}</div>`;
   }
+}
+
+function selectFinalPrice(val, el) {
+  document.getElementById("finalPriceInput").value = val;
+  document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+  if (el) el.classList.add('active');
 }
 
 // ====================================================

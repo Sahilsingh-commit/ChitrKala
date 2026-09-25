@@ -20,6 +20,7 @@ no commentary), with exactly this shape:
   "description_en": "string - a 2-3 sentence professional product description in English, highlighting craftsmanship and materials",
   "description_hi": "string - the same description translated naturally into Hindi",
   "category": "string - best-guess product category, e.g. 'Handloom textile', 'Pottery', 'Jewelry', 'Woodwork'",
+  "complexity_tier": "string - 'basic', 'standard', or 'premium' based on materials/motifs/techniques mentioned (e.g. 'kadhua', 'pure silk', 'gold zari' -> premium; 'cotton', 'simple', 'small' -> basic)",
   "tags": ["array", "of", "5-8", "lowercase", "seo", "keywords"],
   "confidence": "number between 0 and 1 - how confident you are in this transcription and listing"
 }

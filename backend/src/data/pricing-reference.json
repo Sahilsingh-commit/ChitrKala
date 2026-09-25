@@ -1,0 +1,37 @@
+{
+  "madhubani_painting": {
+    "basic": [500, 2500],
+    "standard": [4000, 9000],
+    "premium": [8000, 16000]
+  },
+  "banarasi_saree": {
+    "basic": [2000, 6000],
+    "standard": [6000, 12000],
+    "premium": [12000, 30000]
+  },
+  "pottery": {
+    "basic": [300, 1200],
+    "standard": [1500, 4000],
+    "premium": [4500, 10000]
+  },
+  "woodwork": {
+    "basic": [800, 2500],
+    "standard": [3000, 8000],
+    "premium": [8500, 20000]
+  },
+  "handloom_textile": {
+    "basic": [1000, 3500],
+    "standard": [4000, 9000],
+    "premium": [9500, 22000]
+  },
+  "jewelry": {
+    "basic": [500, 2000],
+    "standard": [2500, 7000],
+    "premium": [7500, 18000]
+  },
+  "_default": {
+    "basic": [500, 2000],
+    "standard": [2000, 6000],
+    "premium": [6000, 15000]
+  }
+}

@@ -9,6 +9,5 @@ node_modules/
 
 # Logs & temp files
 *.log
-npm-debug.log*
 tmp/
 temp/

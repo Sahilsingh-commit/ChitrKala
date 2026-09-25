@@ -2,6 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import { generateListingFromVoiceNote } from "../services/geminiService.js";
 import { processImageStudio } from "../services/imageStudioService.js";
+import { buildPricingBlock } from "../services/pricingService.js";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ const upload = multer({
 // - "image": product photo file
 // - "voiceNote": voice audio file
 // - "backgroundColor", "enhanceLighting", "targetSize" (optional studio params)
+// - "artisan_expected_price", "build_time", "is_handmade" (pricing params)
 router.post(
   "/unified-catalog",
   upload.fields([
@@ -37,7 +39,13 @@ router.post(
       targetSize = 1000,
       enhanceLighting = "true",
       format = "jpeg",
+      artisan_expected_price = null,
+      build_time = "1–3 days",
+      is_handmade = "true",
     } = req.body;
+
+    const parsedIsHandmade = is_handmade === "true" || is_handmade === true;
+    const parsedExpectedPrice = artisan_expected_price ? parseFloat(artisan_expected_price) : null;
 
     // Build promises array for concurrent processing via Promise.allSettled
     const imagePromise = imageFile
@@ -92,13 +100,31 @@ router.post(
       };
     }
 
-    // Handle Gemini Voice Catalog result
+    // Handle Gemini Voice Catalog result + Pricing calculation
     if (voiceResult.status === "fulfilled") {
+      const voiceVal = voiceResult.value;
+      const pricingBlock = buildPricingBlock(voiceVal, {
+        is_handmade: parsedIsHandmade,
+        build_time,
+        artisan_expected_price: parsedExpectedPrice,
+      });
+
       listingData = {
-        ...voiceResult.value,
+        ...voiceVal,
+        pricing: pricingBlock,
         listing_error: null,
       };
     } else {
+      // Baseline pricing if voice note failed/missing but artisan provided parameters
+      const fallbackPricing = buildPricingBlock(
+        { category: "_default", complexity_tier: "standard" },
+        {
+          is_handmade: parsedIsHandmade,
+          build_time,
+          artisan_expected_price: parsedExpectedPrice,
+        }
+      );
+
       listingData = {
         title: null,
         description_en: null,
@@ -108,6 +134,7 @@ router.post(
         confidence: 0,
         transcript: null,
         detected_language: null,
+        pricing: fallbackPricing,
         listing_error: voiceFile
           ? `Voice cataloging failed: ${voiceResult.reason?.message}`
           : "No voice note provided",
