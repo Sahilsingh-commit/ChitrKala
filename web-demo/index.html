@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ChitrKala - Artisan AI Studio & Auto-Cataloger</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+    max-width: 960px;
+    margin: 30px auto;
+    padding: 0 20px;
+    color: #2c2c2a;
+    background: #fafaf7;
+  }
+  header {
+    border-bottom: 2px solid #e2e0d8;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+  h1 { font-size: 26px; margin: 0 0 6px 0; color: #1a1a1a; }
+  p.sub { color: #666; margin: 0; font-size: 15px; }
+
+  /* Navigation Tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid #dcdad0;
+    background: #eae8df;
+    font-weight: 600;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .tab-btn.active {
+    background: #d85a30;
+    color: #fff;
+    border-color: #d85a30;
+  }
+
+  .section-panel { display: none; }
+  .section-panel.active { display: block; }
+
+  .card {
+    background: #fff;
+    border: 1px solid #e2e0d8;
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  button {
+    font-size: 15px;
+    font-weight: 600;
+    padding: 11px 22px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+  }
+  button.primary { background: #d85a30; color: white; border: none; }
+  button.primary:hover { background: #c24d26; }
+  button.record.recording { background: #a32d2d; color: white; border: none; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .status { margin-top: 12px; font-size: 14px; color: #555; font-weight: 500; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 11px; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+  .field .value { font-size: 15px; line-height: 1.4; }
+  .tags span {
+    display: inline-block;
+    background: #eef3e2;
+    color: #3b6d11;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin: 2px 4px 2px 0;
+    font-weight: 500;
+  }
+  audio { width: 100%; margin-top: 10px; }
+  .warning-box {
+    color: #856404;
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  .error-box {
+    color: #721c24;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-top: 12px;
+  }
+
+  select, input[type="file"] {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+
+  /* Result Layout */
+  .result-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  @media (max-width: 840px) {
+    .result-grid { grid-template-columns: 1fr; }
+  }
+
+  .studio-result-card {
+    background: #fff;
+    border: 1px solid #e2e0d8;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+  .studio-result-card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    background: repeating-conic-gradient(#e6e6e6 0% 25%, #ffffff 0% 50%) 50% / 16px 16px;
+  }
+  .download-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: #2b7a4b;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>ChitrKala - Artisan AI Studio & Auto-Cataloger</h1>
+  <p class="sub">Unified local AI workspace: Photo to E-Commerce Studio + Regional Voice Note to Bilingual SEO Listing.</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('unified')">🚀 Unified Studio & Auto-Cataloger</button>
+  <button class="tab-btn" onclick="switchTab('cataloger')">🎙️ Standalone Voice Cataloger</button>
+  <button class="tab-btn" onclick="switchTab('studio')">🖼️ Standalone Image Studio</button>
+</div>
+
+<!-- ==================================================== -->
+<!-- SECTION 1: UNIFIED FLOW (IMAGE + VOICE IN ONE FORM) -->
+<!-- ==================================================== -->
+<div id="unified" class="section-panel active">
+  <div class="card">
+    <h3>Create Full E-Commerce Listing</h3>
+    <p style="font-size:14px; color:#666; margin-bottom:20px;">Upload a product photo and record a voice description. The backend processes both concurrently.</p>
+
+    <div class="grid-2">
+      <!-- Left Column: Product Photo -->
+      <div>
+        <div class="field">
+          <label>1. Artisan Product Photo</label>
+          <input type="file" id="uImageInput" accept="image/*" />
+        </div>
+
+        <div class="field">
+          <label>Studio Background Canvas</label>
+          <select id="uBgColor">
+            <option value="#FFFFFF">Pure Studio White (#FFFFFF)</option>
+            <option value="#FAFAF7">Warm Artisan Cream (#FAFAF7)</option>
+            <option value="transparent">Transparent PNG (No Background)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Right Column: Voice Note -->
+      <div>
+        <div class="field">
+          <label>2. Product Voice Note (Any Language)</label>
+          <button id="uRecordBtn" class="record" style="width:100%;">🎙️ Start Recording Voice Note</button>
+          <div id="uVoiceStatus" class="status" style="font-size:12px;"></div>
+          <audio id="uPlayback" controls style="display:none"></audio>
+        </div>
+
+        <div class="field">
+          <label>Studio Lighting Boost</label>
+          <select id="uLightingToggle">
+            <option value="true">Enable Studio Enhancement (Recommended)</option>
+            <option value="false">Original Lighting</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;" />
+
+    <button id="uSubmitBtn" class="primary" style="width:100%; font-size:16px; padding:14px;">
+      🚀 Generate Full E-Commerce Listing (Studio Image + Bilingual Catalog)
+    </button>
+    <div id="uGlobalStatus" class="status"></div>
+  </div>
+
+  <!-- Unified Result View -->
+  <div id="uResultView" class="result-grid" style="display:none;">
+    <!-- Studio Processed Image Column -->
+    <div class="studio-result-card">
+      <h4 style="margin:0 0 12px 0; font-size:13px; color:#666; text-transform:uppercase;">E-Commerce Studio Image</h4>
+      <div id="uImageContainer">
+        <img id="uProcessedImg" src="" alt="Processed product" />
+      </div>
+      <a id="uDownloadBtn" class="download-btn" download="chitrkala-studio-listing.jpg">Download Studio Photo</a>
+    </div>
+
+    <!-- Bilingual Listing Details Column -->
+    <div class="card" style="margin-top:0;">
+      <h3 style="margin-top:0;">Bilingual Catalog & SEO Listing</h3>
+      <div id="uListingContainer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================================================== -->
+<!-- SECTION 2: STANDALONE VOICE CATALOGER (TESTING)    -->
+<!-- ==================================================== -->
+<div id="cataloger" class="section-panel">
+  <div class="card">
+    <h3>Multilingual Voice Description Only</h3>
+    <p style="font-size:14px; color:#666;">Record a voice note to generate structured bilingual text listing.</p>
+    <button id="sRecordBtn" class="primary record">Start recording</button>
+    <div id="sVoiceStatus" class="status"></div>
+    <audio id="sPlayback" controls style="display:none"></audio>
+  </div>
+  <div id="sListingResult"></div>
+</div>
+
+<!-- ==================================================== -->
+<!-- SECTION 3: STANDALONE IMAGE STUDIO (TESTING)      -->
+<!-- ==================================================== -->
+<div id="studio" class="section-panel">
+  <div class="card">
+    <h3>Local Image Studio Only</h3>
+    <p style="font-size:14px; color:#666;">Upload product photo for 100% local ONNX AI background removal.</p>
+    <div class="field">
+      <label>Upload Product Photo</label>
+      <input type="file" id="sImageInput" accept="image/*" />
+    </div>
+    <button id="sProcessImageBtn" class="primary" disabled>Process Studio Image</button>
+    <div id="sStudioStatus" class="status"></div>
+  </div>
+  <div id="sStudioResult" style="display:none; margin-top:20px; text-align:center;">
+    <div class="card">
+      <h4>Processed Studio Image</h4>
+      <img id="sProcessedImg" src="" style="max-width:400px; border-radius:8px;" />
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.section-panel').forEach(panel => panel.classList.remove('active'));
+
+  if (tabId === 'unified') {
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    document.getElementById('unified').classList.add('active');
+  } else if (tabId === 'cataloger') {
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('cataloger').classList.add('active');
+  } else {
+    document.querySelectorAll('.tab-btn')[2].classList.add('active');
+    document.getElementById('studio').classList.add('active');
+  }
+}
+
+// ====================================================
+// 1. UNIFIED FLOW CODE
+// ====================================================
+const uImageInput = document.getElementById("uImageInput");
+const uRecordBtn = document.getElementById("uRecordBtn");
+const uVoiceStatus = document.getElementById("uVoiceStatus");
+const uPlayback = document.getElementById("uPlayback");
+const uSubmitBtn = document.getElementById("uSubmitBtn");
+const uGlobalStatus = document.getElementById("uGlobalStatus");
+const uResultView = document.getElementById("uResultView");
+const uDownloadBtn = document.getElementById("uDownloadBtn");
+const uListingContainer = document.getElementById("uListingContainer");
+const uImageContainer = document.getElementById("uImageContainer");
+
+const BACKEND_UNIFIED_URL = "http://localhost:4000/api/unified-catalog";
+
+let uSelectedImageFile = null;
+let uAudioBlob = null;
+let uMediaRecorder = null;
+let uChunks = [];
+let uIsRecording = false;
+
+uImageInput.addEventListener("change", (e) => {
+  if (e.target.files && e.target.files[0]) {
+    uSelectedImageFile = e.target.files[0];
+  }
+});
+
+uRecordBtn.addEventListener("click", async () => {
+  if (!uIsRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      uChunks = [];
+      uMediaRecorder = new MediaRecorder(stream);
+      uMediaRecorder.ondataavailable = (e) => uChunks.push(e.data);
+      uMediaRecorder.onstop = () => {
+        uAudioBlob = new Blob(uChunks, { type: "audio/webm" });
+        uPlayback.src = URL.createObjectURL(uAudioBlob);
+        uPlayback.style.display = "block";
+        uVoiceStatus.textContent = "Voice note recorded successfully.";
+      };
+      uMediaRecorder.start();
+      uIsRecording = true;
+      uRecordBtn.textContent = "⏹️ Stop Recording";
+      uRecordBtn.classList.add("recording");
+      uVoiceStatus.textContent = "Recording in progress...";
+    } catch (err) {
+      uVoiceStatus.textContent = "Microphone error: " + err.message;
+    }
+  } else {
+    uMediaRecorder.stop();
+    uMediaRecorder.stream.getTracks().forEach((t) => t.stop());
+    uIsRecording = false;
+    uRecordBtn.textContent = "🎙️ Record New Voice Note";
+    uRecordBtn.classList.remove("recording");
+  }
+});
+
+uSubmitBtn.addEventListener("click", async () => {
+  if (!uSelectedImageFile && !uAudioBlob) {
+    alert("Please provide at least a product photo or a voice note before submitting.");
+    return;
+  }
+
+  uSubmitBtn.disabled = true;
+  uGlobalStatus.textContent = "Processing image studio & Gemini AI voice cataloging concurrently...";
+  uResultView.style.display = "none";
+
+  const formData = new FormData();
+  if (uSelectedImageFile) {
+    formData.append("image", uSelectedImageFile);
+  }
+  if (uAudioBlob) {
+    formData.append("voiceNote", uAudioBlob, "note.webm");
+  }
+  formData.append("backgroundColor", document.getElementById("uBgColor").value);
+  formData.append("enhanceLighting", document.getElementById("uLightingToggle").value);
+
+  try {
+    const res = await fetch(BACKEND_UNIFIED_URL, { method: "POST", body: formData });
+    const data = await res.json();
+
+    if (!res.ok && !data.studio?.processed_image && !data.listing?.title) {
+      throw new Error(data.error || "Failed to fetch from backend. Ensure 'npm start' is running on port 4000.");
+    }
+
+    renderUnifiedResult(data);
+    uResultView.style.display = "grid";
+    uGlobalStatus.textContent = "Processing complete!";
+  } catch (err) {
+    uGlobalStatus.innerHTML = `<div class="error-box">Failed to fetch backend: ${escapeHtml(err.message)}.<br><br><strong>Check:</strong> Is the backend server running? Run <code>npm start</code> inside the backend folder.</div>`;
+  } finally {
+    uSubmitBtn.disabled = false;
+  }
+});
+
+function renderUnifiedResult(data) {
+  const { studio, listing } = data;
+
+  // Render Studio Image
+  if (studio && studio.processed_image) {
+    uImageContainer.innerHTML = `<img src="${studio.processed_image}" alt="Studio product" />`;
+    uDownloadBtn.href = studio.processed_image;
+    uDownloadBtn.style.display = "block";
+  } else {
+    const errText = studio?.image_error || "No image processed";
+    uImageContainer.innerHTML = `<div class="warning-box">⚠️ Image Studio Warning: ${escapeHtml(errText)}</div>`;
+    uDownloadBtn.style.display = "none";
+  }
+
+  // Render Listing Details
+  if (listing && (listing.title || listing.description_en)) {
+    let warningHtml = "";
+    if (listing.listing_error) {
+      warningHtml = `<div class="warning-box">⚠️ Voice Note Warning: ${escapeHtml(listing.listing_error)}</div>`;
+    }
+
+    const tagsHtml = (listing.tags || [])
+      .map((t) => `<span>${escapeHtml(t)}</span>`)
+      .join("");
+
+    uListingContainer.innerHTML = `
+      ${warningHtml}
+      <div class="field"><label>Detected Language</label><div class="value">${escapeHtml(listing.detected_language || "-")}</div></div>
+      <div class="field"><label>Title</label><div class="value" style="font-weight:700; font-size:17px; color:#1a1a1a;">${escapeHtml(listing.title || "-")}</div></div>
+      <div class="field"><label>Description (English)</label><div class="value">${escapeHtml(listing.description_en || "-")}</div></div>
+      <div class="field"><label>Description (Hindi)</label><div class="value">${escapeHtml(listing.description_hi || "-")}</div></div>
+      <div class="field"><label>Category</label><div class="value">${escapeHtml(listing.category || "-")}</div></div>
+      <div class="field"><label>SEO Tags</label><div class="tags">${tagsHtml}</div></div>
+      <div class="field"><label>AI Confidence</label><div class="value">${Math.round((listing.confidence || 0) * 100)}%</div></div>
+      <div class="field"><label>Raw Voice Transcript</label><div class="value" style="color:#888; font-size:13px;">${escapeHtml(listing.transcript || "-")}</div></div>
+    `;
+  } else {
+    const errText = listing?.listing_error || "No voice note processed";
+    uListingContainer.innerHTML = `<div class="warning-box">⚠️ Voice Catalog Warning: ${escapeHtml(errText)}</div>`;
+  }
+}
+
+// ====================================================
+// 2. STANDALONE VOICE CATALOGER CODE
+// ====================================================
+const sRecordBtn = document.getElementById("sRecordBtn");
+const sVoiceStatus = document.getElementById("sVoiceStatus");
+const sPlayback = document.getElementById("sPlayback");
+const sListingResult = document.getElementById("sListingResult");
+
+const BACKEND_CATALOG_URL = "http://localhost:4000/api/catalog";
+
+let sMediaRecorder;
+let sChunks = [];
+let sIsRecording = false;
+
+sRecordBtn.addEventListener("click", async () => {
+  if (!sIsRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      sChunks = [];
+      sMediaRecorder = new MediaRecorder(stream);
+      sMediaRecorder.ondataavailable = (e) => sChunks.push(e.data);
+      sMediaRecorder.onstop = handleStandaloneRecordingStop;
+      sMediaRecorder.start();
+      sIsRecording = true;
+      sRecordBtn.textContent = "Stop recording";
+      sRecordBtn.classList.add("recording");
+      sVoiceStatus.textContent = "Recording... speak your product description now.";
+      sListingResult.innerHTML = "";
+    } catch (err) {
+      sVoiceStatus.textContent = "Microphone access denied: " + err.message;
+    }
+  } else {
+    sMediaRecorder.stop();
+    sMediaRecorder.stream.getTracks().forEach((t) => t.stop());
+    sIsRecording = false;
+    sRecordBtn.textContent = "Start recording";
+    sRecordBtn.classList.remove("recording");
+  }
+});
+
+async function handleStandaloneRecordingStop() {
+  const blob = new Blob(sChunks, { type: "audio/webm" });
+  sPlayback.src = URL.createObjectURL(blob);
+  sPlayback.style.display = "block";
+  sVoiceStatus.textContent = "Sending to backend for AI cataloging...";
+
+  const formData = new FormData();
+  formData.append("voiceNote", blob, "note.webm");
+
+  try {
+    const res = await fetch(BACKEND_CATALOG_URL, { method: "POST", body: formData });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || "Backend error");
+
+    const listing = data.listing;
+    const tagsHtml = (listing.tags || []).map((t) => `<span>${escapeHtml(t)}</span>`).join("");
+
+    sListingResult.innerHTML = `
+      <div class="card">
+        <div class="field"><label>Detected language</label><div class="value">${escapeHtml(listing.detected_language || "-")}</div></div>
+        <div class="field"><label>Title</label><div class="value">${escapeHtml(listing.title || "-")}</div></div>
+        <div class="field"><label>Description (English)</label><div class="value">${escapeHtml(listing.description_en || "-")}</div></div>
+        <div class="field"><label>Description (Hindi)</label><div class="value">${escapeHtml(listing.description_hi || "-")}</div></div>
+        <div class="field"><label>Category</label><div class="value">${escapeHtml(listing.category || "-")}</div></div>
+        <div class="field"><label>Tags</label><div class="tags">${tagsHtml}</div></div>
+        <div class="field"><label>Confidence</label><div class="value">${Math.round((listing.confidence || 0) * 100)}%</div></div>
+      </div>
+    `;
+    sVoiceStatus.textContent = "Done.";
+  } catch (err) {
+    sListingResult.innerHTML = `<div class="error-box">Failed: ${escapeHtml(err.message)}</div>`;
+    sVoiceStatus.textContent = "";
+  }
+}
+
+// ====================================================
+// 3. STANDALONE IMAGE STUDIO CODE
+// ====================================================
+const sImageInput = document.getElementById("sImageInput");
+const sProcessImageBtn = document.getElementById("sProcessImageBtn");
+const sStudioStatus = document.getElementById("sStudioStatus");
+const sStudioResult = document.getElementById("sStudioResult");
+const sProcessedImg = document.getElementById("sProcessedImg");
+
+const BACKEND_STUDIO_URL = "http://localhost:4000/api/image-studio";
+let sSelectedFile = null;
+
+sImageInput.addEventListener("change", (e) => {
+  if (e.target.files && e.target.files[0]) {
+    sSelectedFile = e.target.files[0];
+    sProcessImageBtn.disabled = false;
+    sStudioResult.style.display = "none";
+    sStudioStatus.textContent = "Image loaded. Click 'Process Studio Image'.";
+  }
+});
+
+sProcessImageBtn.addEventListener("click", async () => {
+  if (!sSelectedFile) return;
+
+  sProcessImageBtn.disabled = true;
+  sStudioStatus.textContent = "Processing local AI background removal... (1-3s)";
+
+  const formData = new FormData();
+  formData.append("image", sSelectedFile);
+  formData.append("backgroundColor", "#FFFFFF");
+  formData.append("enhanceLighting", "true");
+
+  try {
+    const res = await fetch(BACKEND_STUDIO_URL, { method: "POST", body: formData });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || "Studio error");
+
+    sProcessedImg.src = data.image;
+    sStudioResult.style.display = "block";
+    sStudioStatus.textContent = "Complete!";
+  } catch (err) {
+    sStudioStatus.textContent = "Error: " + err.message;
+  } finally {
+    sProcessImageBtn.disabled = false;
+  }
+});
+
+// Helper escape function
+function escapeHtml(str) {
+  if (!str) return "";
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+</script>
+
+</body>
+</html>
