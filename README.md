@@ -1,141 +1,162 @@
-# ChitrKala — Artisan AI Studio & Multilingual Auto-Cataloger 🎨🎙️
+# ChitrKala — Artisan AI Studio & Auto-Cataloger
 
-**ChitrKala** is an AI-powered local workspace built for Indian artisans. It transforms raw product photos and regional voice descriptions into professional, e-commerce-ready studio listings (with studio canvas framing, local AI background removal, and bilingual English + Hindi SEO product listings).
+**SIH26090** — Smart India Hackathon 2026
 
----
-
-## 🌟 Key Features
-
-1. **Multilingual Auto-Cataloger (Voice → Listing)**
-   - Artisans record product descriptions in any Indian regional language (Hindi, Marathi, Gujarati, English, etc.).
-   - Uses Google Gemini Multimodal AI with automatic model retries (`gemini-3.5-flash`, `gemini-3.6-flash`, etc.) to return structured JSON with English & Hindi titles, descriptions, categories, and SEO tags in a single step.
-
-2. **100% Local Image Studio (Local AI BG Removal + Canvas Enhancement)**
-   - **Zero External API Dependency**: Uses `@imgly/background-removal-node` (ONNX WebAssembly neural network model running locally inside Node.js).
-   - **E-Commerce Canvas Framing**: Automatically centers and pads products on a square 1000x1000 studio canvas (Pure White `#FFFFFF`, Off-White Cream `#FAFAF7`, or Transparent PNG).
-   - **Studio Lighting Boost**: Enhances product lighting and color saturation without altering background purity.
-
-3. **Unified Parallel Catalog Workflow (`POST /api/unified-catalog`)**
-   - Processes both product photo and voice note in parallel using `Promise.allSettled()`.
-   - **Partial Failure Resiliency**: If one input is missing or fails, the API gracefully returns the successful output alongside inline warnings.
+An AI-powered web app that turns a product photo and a voice note into a professional, priced, multilingual e-commerce listing — transforming a multi-day manual digitization struggle into a single scan-and-speak action.
 
 ---
 
-## 📁 Repository Structure
+## 🎥 Demo
 
-```text
-chitrkala/
-├── backend/
-│   ├── src/
-│   │   ├── routes/
-│   │   │   ├── catalog.js         # Standalone POST /api/catalog (Voice)
-│   │   │   ├── imageStudio.js     # Standalone POST /api/image-studio (Image)
-│   │   │   └── unifiedCatalog.js  # Unified POST /api/unified-catalog (Image + Voice)
-│   │   └── services/
-│   │       ├── geminiService.js   # Multimodal Gemini AI service with retries
-│   │       └── imageStudioService.js # Local ONNX BG removal & Jimp studio engine
-│   ├── server.js                  # Express backend entry point (Port 4000)
-│   ├── package.json
-│   ├── .env.example               # Environment template (NO SECRETS)
-│   └── .gitignore                 # Backend git ignore rules
-├── web-demo/
-│   └── index.html                 # Unified Artisan Web Demo UI
-├── .gitignore                     # Root git ignore rules
-└── README.md                      # Project documentation
+**Video walkthrough:** _[coming soon]_
+
+---
+
+## 📋 The Problem
+
+Millions of marginalized artisans across India — many home-based, many with limited literacy or smartphone comfort — still rely on temporary physical fairs and PM Vishwakarma-style schemes for market access. Getting a product online today means writing a description, photographing it well, and guessing a fair price, none of which are easy without training:
+
+- **No year-round digital market access** — sales are tied to seasonal fairs, not a standing storefront
+- **Poor product presentation** — phone photos aren't e-commerce ready, and most artisans have no photo-editing skill or tools
+- **Language & literacy barriers** — listing forms assume typing and English/text fluency neither always exist
+- **No awareness of fair, competitive pricing** — artisans routinely under- or over-price work relative to the market, with no benchmark to check against
+
+## 💡 Our Solution
+
+An artisan photographs their product and records a short voice note describing it, in whatever language they're comfortable in. From that single capture, ChitrKala automatically:
+
+1. Enhances and formats the photo into a studio-quality e-commerce image (background removal + cleanup)
+2. Transcribes and interprets the voice note into a structured product description
+3. Generates a bilingual (English + Hindi) title and description
+4. Benchmarks the product against category-matched reference pricing and shows a low / recommended / high range with reasoning
+5. Requires the artisan to confirm a final price before anything goes live
+6. Publishes the confirmed listing to a public buyer marketplace, with a direct WhatsApp contact link to the artisan
+
+What used to take a multi-day round trip through a photographer, a translator, and a market survey now takes one photo and one voice note.
+
+## ✨ Key Features
+
+- 📸 **AI Image Studio** — local, on-device background removal (ONNX model) plus image cleanup/formatting, no cloud image API required
+- 🎙️ **Voice-first cataloging** — record a description in any language, no typing required
+- 🌐 **Bilingual listing generation** — auto-detects the spoken language and produces English + Hindi title/description
+- 💰 **AI Pricing Assistant** — category-matched reference pricing (low / recommended / high) with transparent reasoning, compared against the artisan's own expected price
+- ✅ **Mandatory final-price confirmation** — nothing publishes until the artisan explicitly confirms a selling price
+- 🚀 **One-click publish to marketplace** — confirmed listings go live on a public, buyer-facing marketplace page
+- 🛍️ **Buyer marketplace** — browsable product cards (image, title, price, handmade tag, description), no cart or payment flow — this is a discovery + contact tool, not a full storefront
+- 💬 **Direct contact seller** — buyers reach the artisan straight over WhatsApp, no middleman
+- 🔗 **Shareable product links** — each listing gets its own shareable URL for WhatsApp/social sharing
+- 🔐 **Artisan accounts** — JWT-based authentication so listings and contact details are tied to a real seller profile
+
+## 🏗️ Architecture
+
+```
+Client (React + Vite, React Router)
+        │  REST / multipart
+        ▼
+Node.js / Express Backend
+   ├── Auth (JWT + bcrypt)
+   ├── Image Studio (local ONNX background removal + Sharp/Jimp processing)
+   ├── Voice → Listing Generation (Google Gemini API)
+   ├── Pricing Engine (category-matched reference benchmarking)
+   ├── Listings Service (draft → confirm → publish)
+   └── Marketplace API (public read endpoints for buyers)
+        │
+        ▼
+MongoDB (via Mongoose)
 ```
 
----
+## 🛠️ Tech Stack
 
-## 🚀 Quickstart Guide
+| Layer | Technology |
+|---|---|
+| Frontend | React 18 (Vite), React Router DOM |
+| Backend | Node.js, Express |
+| Database | MongoDB (Mongoose) |
+| Auth | JWT (`jsonwebtoken`), `bcryptjs` |
+| AI / Listing Generation | Google Gemini API (`@google/genai`) |
+| Image Processing | `@imgly/background-removal-node` (local ONNX bg removal), `sharp`, `jimp` |
+| File Uploads | `multer` |
+| Config | `dotenv`, `cors` |
 
-### 1. Prerequisites
-- **Node.js**: v18 or higher installed on your system.
-- **Gemini API Key**: Free API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+## 🚀 Getting Started
 
-### 2. Backend Setup
+### Prerequisites
+- Node.js (v18+)
+- npm
+- A MongoDB connection string (local or Atlas)
+- A Google Gemini API key
 
+### 1. Clone the repository
 ```bash
-# Navigate to backend folder
+git clone https://github.com/Sahilsingh-commit/ChitrKala.git
+cd ChitrKala
+```
+
+### 2. Set up the backend
+```bash
 cd backend
-
-# Install dependencies
 npm install
-
-# Set up environment variables
-cp .env.example .env
-```
-
-Open `backend/.env` in your code editor and add your API key:
-```env
-GEMINI_API_KEY=your_actual_gemini_api_key_here
-PORT=4000
-```
-
-Start the backend server:
-```bash
+# create a .env file — see .env.example
+# required: MONGODB_URI, JWT_SECRET, GEMINI_API_KEY
 npm start
 ```
-*Confirm server health at `http://localhost:4000/health`.*
 
-### 3. Launch Web Demo
-
-Open `web-demo/index.html` directly in any web browser (Google Chrome recommended for microphone access).
-
----
-
-## 📡 API Reference
-
-### 1. Unified Catalog Endpoint
-
-`POST /api/unified-catalog`  
-**Content-Type**: `multipart/form-data`
-
-#### Parameters:
-- `image` *(file, optional)*: Product photo.
-- `voiceNote` *(file, optional)*: Product voice note audio (webm/wav/mp3).
-- `backgroundColor` *(string, optional)*: `#FFFFFF` (default), `#FAFAF7`, or `transparent`.
-- `enhanceLighting` *(string, optional)*: `"true"` (default) or `"false"`.
-
-#### Response Example:
-```json
-{
-  "success": true,
-  "listing": {
-    "title": "Handwoven Red and Gold Banarasi Silk Saree",
-    "description_en": "Exquisitely handwoven by skilled artisans...",
-    "description_hi": "कुशल कारीगरों द्वारा हाथ से बुनी गई यह शुद्ध बनारसी सिल्क साड़ी...",
-    "category": "Handloom textile",
-    "tags": ["banarasi saree", "silk saree", "handwoven", "bridal wear"],
-    "confidence": 0.95,
-    "transcript": "Hello, I have handwoven this Banarasi silk saree...",
-    "detected_language": "Hindi-English mixed",
-    "listing_error": null
-  },
-  "studio": {
-    "processed_image": "data:image/jpeg;base64,...",
-    "original_image": "data:image/jpeg;base64,...",
-    "mimeType": "image/jpeg",
-    "width": 1000,
-    "height": 1000,
-    "image_error": null
-  }
-}
+### 3. Set up the frontend
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-### 2. Standalone Endpoints
-- `POST /api/catalog` — Accepts `voiceNote` file -> Returns bilingual listing JSON.
-- `POST /api/image-studio` — Accepts `image` file -> Returns studio processed base64 image.
+### 4. Open the app
+Navigate to the local URL Vite prints (typically `http://localhost:5173`).
+
+> **Note:** `web-demo/` in this repo is an earlier static prototype used during development and is not the current application — use `frontend/` + `backend/` above.
+
+## 📖 API Overview
+
+> Endpoint paths below reflect the current listing/marketplace flow; see `backend/src/routes/` for the exact, up-to-date route definitions.
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/auth/register` | POST | Create an artisan account |
+| `/api/auth/login` | POST | Authenticate and receive a JWT |
+| `/api/listings/generate` | POST | Accepts a product photo + voice note, returns studio image, bilingual listing, and pricing benchmark |
+| `/api/listings` | POST | Publish a confirmed listing (with final price) to the marketplace |
+| `/api/listings` | GET | Fetch all published listings (marketplace view) |
+| `/api/listings/:id` | GET | Fetch a single published listing (product/share view) |
+
+## ⚠️ Known Limitations
+
+We believe in documenting real, tested limitations rather than hiding them. Key ones:
+
+- Pricing is generated from category-matched reference data, not live marketplace scraping — accuracy depends on how well a product's category matches our reference set
+- Voice-to-listing accuracy depends on Gemini's handling of the spoken language/dialect; no manual-correction feedback loop exists yet
+- No offline-first capture yet — an active connection is required end-to-end
+- Marketplace intentionally has no cart, checkout, or payment processing — by design, this is a discovery-and-contact tool, not a transacting e-commerce platform
+
+## 🗺️ Roadmap
+
+-  GeM / PM Vishwakarma marketplace integration
+-  Offline-first capture (store now, sync later) for low-connectivity areas
+-  Confidence-based fallback to manual text entry for low-confidence voice input
+-  Expanded regional language support beyond Hindi
+-  Basic analytics for artisans (views/enquiries per listing)
+-  Reference-price dataset expansion across more craft categories
+
+## 👥 Team members
+
+Sahil, Puneet kumar, Aditya ray, Neeraj kumar Rana, Akshat gautam and Yashita Bijlani.
+
+**Team Name:** Metric Vision
+**Team ID:** 173371
+
+## 📚 References
+
+- [PM Vishwakarma Scheme](https://pmvishwakarma.gov.in/) — Ministry of Micro, Small & Medium Enterprises, Government of India
+- [GeM (Government e Marketplace)](https://gem.gov.in/) — for B2B/institutional artisan market linkage context
+- [Bhashini](https://bhashini.gov.in/) — National Language Translation Mission, referenced for regional-language ecosystem alignment
 
 ---
 
-## 🔒 Security & Git Best Practices
-
-> [!IMPORTANT]
-> **Never commit `.env` or secret API keys to GitHub!**
-> Both root `.gitignore` and `backend/.gitignore` are pre-configured to exclude:
-> - `node_modules/`
-> - `.env` and `.env.local`
-> - Log files (`*.log`)
-> - OS / IDE caches (`.DS_Store`, `.vscode/`)
-
-When deploying or sharing on GitHub, always distribute `.env.example` so contributors can configure their own local `.env` keys.
+*Built for Smart India Hackathon 2026 — Problem Statement SIH26090*
