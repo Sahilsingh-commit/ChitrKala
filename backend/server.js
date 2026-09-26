@@ -16,7 +16,16 @@ connectDB();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",           // local dev
+  "https://chitrkala-metric.vercel.app" // your actual deployed Vercel URL
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true, // only needed if you're sending cookies/auth headers cross-site
+}));
+
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
