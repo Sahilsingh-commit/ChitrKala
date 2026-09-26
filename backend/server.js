@@ -10,9 +10,6 @@ import authRoutes from "./src/routes/auth.js";
 
 console.log("Key loaded:", process.env.GEMINI_API_KEY ? "yes, length " + process.env.GEMINI_API_KEY.length : "NO - still undefined");
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
 const PORT = process.env.PORT || 4000;
 
@@ -43,6 +40,19 @@ app.use("/api", unifiedCatalogRoutes);
 app.use("/api", productRoutes);
 app.use("/api/auth", authRoutes);
 
-app.listen(PORT, () => {
-  console.log(`ChitrKala backend running on http://localhost:${PORT}`);
+// KEY FIX: previously `connectDB()` was called without awaiting it, and
+// `app.listen()` ran immediately after — so the server could start accepting
+// requests (and Mongoose could start "buffering" queries) before the Atlas
+// connection had actually finished. On a cold Render start, a request could
+// arrive mid-handshake and time out around the 8s serverSelectionTimeoutMS
+// mark, which is exactly the ~10s failure being seen.
+//
+// Now, the server does not start listening until the DB connection attempt
+// has fully resolved — either connected successfully, or fallen back to
+// memory mode. Either way, by the time any request can arrive, the app
+// already knows its real DB state and won't hang mid-query.
+connectDB().finally(() => {
+  app.listen(PORT, () => {
+    console.log(`ChitrKala backend running on port ${PORT}`);
+  });
 });
