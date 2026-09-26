@@ -1,6 +1,6 @@
 /**
  * Centralized API configuration for ChitrKala Frontend
- * Handles automatic fallback, path normalization, and slash trimming.
+ * Handles automatic fallback, path normalization, slash trimming, and HTTPS enforcement.
  */
 
 const getApiBaseUrl = () => {
@@ -12,6 +12,10 @@ const getApiBaseUrl = () => {
     // Automatically append /api if missing
     if (!cleanUrl.endsWith("/api")) {
       cleanUrl = `${cleanUrl}/api`;
+    }
+    // Enforce HTTPS for production remote URLs to prevent Mixed Content browser blocking
+    if (!cleanUrl.startsWith("http://localhost") && !cleanUrl.startsWith("http://127.0.0.1")) {
+      cleanUrl = cleanUrl.replace(/^http:\/\//i, "https://");
     }
     return cleanUrl;
   }

@@ -19,26 +19,33 @@ export default function SellerPage() {
     setPostedProduct(null);
 
     const fd = new FormData();
-    if (opts.imageFile) fd.append("image", opts.imageFile);
-    if (opts.audioBlob) fd.append("voiceNote", opts.audioBlob, "note.webm");
-    fd.append("backgroundColor", opts.bgColor);
-    fd.append("enhanceLighting", opts.enhanceLighting);
-    if (opts.expectedPrice) fd.append("artisan_expected_price", opts.expectedPrice);
-    fd.append("build_time", opts.buildTime);
+    if (opts.imageFile && opts.imageFile instanceof Blob) {
+      fd.append("image", opts.imageFile);
+    }
+    if (opts.audioBlob && opts.audioBlob instanceof Blob) {
+      fd.append("voiceNote", opts.audioBlob, "note.webm");
+    }
+    fd.append("backgroundColor", opts.bgColor || "#FFFFFF");
+    fd.append("enhanceLighting", String(opts.enhanceLighting ?? "true"));
+    if (opts.expectedPrice) fd.append("artisan_expected_price", String(opts.expectedPrice));
+    fd.append("build_time", opts.buildTime || "1–3 days");
     fd.append("is_handmade", opts.isHandmade ? "true" : "false");
 
     try {
+      console.log("Submitting to UNIFIED_URL:", UNIFIED_URL);
       const res = await fetch(UNIFIED_URL, { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok && !data?.studio?.processed_image && !data?.listing?.title) {
-        throw new Error(data.error || "Backend request failed. Is the server running on port 4000?");
+        throw new Error(data.error || `Server error ${res.status}: Failed to process cataloging.`);
       }
       setResult(data);
     } catch (err) {
-      if (err.message === "Failed to fetch" || err.name === "TypeError") {
-        setError("Unable to connect to backend server. If accessing the deployed app on Render/Vercel, the backend server may be waking up from a cold start or timed out on upload. Please wait a few seconds and try submitting again.");
+      console.error("Generate listing error:", err);
+      const msg = err?.message || String(err);
+      if (msg === "Failed to fetch" || msg.includes("NetworkError") || msg.includes("Load failed")) {
+        setError(`Network Error: Unable to reach backend at ${UNIFIED_URL}. If on Render, the backend server may be waking up from a cold start or blocked by browser settings.`);
       } else {
-        setError(err.message);
+        setError(`Request Error: ${msg}`);
       }
     } finally {
       setIsLoading(false);
