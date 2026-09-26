@@ -3,9 +3,7 @@ import { Link } from "react-router-dom";
 import ListingForm from "../components/ListingForm";
 import PricingDisplay from "../components/PricingDisplay";
 import { useLanguage } from "../context/LanguageContext";
-
-const UNIFIED_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/unified-catalog` : "http://localhost:4000/api/unified-catalog";
-const POST_PRODUCT_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/products` : "http://localhost:4000/api/products";
+import { UNIFIED_URL, POST_PRODUCT_URL } from "../config/api";
 
 export default function SellerPage() {
   const { t } = useLanguage();

@@ -17,8 +17,12 @@ export default function Marketplace({ products = [], isLoading, error }) {
 
   if (error) {
     return (
-      <div className="alert alert-danger">
-        Failed to load marketplace products: {error}. Is the backend running on port 4000?
+      <div className="alert alert-danger" style={{ lineHeight: 1.6 }}>
+        <strong>Unable to fetch marketplace products ({error}).</strong>
+        <br />
+        <span style={{ fontSize: "0.85rem", opacity: 0.9 }}>
+          If accessing the deployed app on Render/Vercel, the backend server may be waking up from a cold start. Please wait 15–30 seconds and try refreshing.
+        </span>
       </div>
     );
   }

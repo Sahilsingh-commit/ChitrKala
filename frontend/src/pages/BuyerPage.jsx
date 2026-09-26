@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Marketplace from "../components/Marketplace";
 import { useLanguage } from "../context/LanguageContext";
-
-const GET_PRODUCTS_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/products` : "http://localhost:4000/api/products";
+import { GET_PRODUCTS_URL } from "../config/api";
 
 export default function BuyerPage() {
   const { t } = useLanguage();

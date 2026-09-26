@@ -13,14 +13,23 @@ console.log("Key loaded:", process.env.GEMINI_API_KEY ? "yes, length " + process
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-const allowedOrigins = [
-  "http://localhost:5173",           // local dev
-  "https://chitrkala-metric.vercel.app" // your actual deployed Vercel URL
-];
-
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true, // only needed if you're sending cookies/auth headers cross-site
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+
+    // Allow local dev, any vercel.app preview/production deployment, or standard origins
+    if (
+      origin.startsWith("http://localhost:") ||
+      origin.startsWith("http://127.0.0.1:") ||
+      origin.endsWith(".vercel.app") ||
+      origin === "https://chitrkala-metric.vercel.app"
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
 }));
 
 app.use(express.json({ limit: "50mb" }));
