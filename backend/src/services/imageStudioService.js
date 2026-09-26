@@ -21,14 +21,31 @@ function parseColorToJimpHex(colorStr) {
 }
 
 /**
- * Processes an input product image using 100% local ONNX AI background removal
- * and Jimp studio image standardization.
+ * Helper to produce a small compressed base64 JPEG from an image buffer for previews.
+ */
+export async function createSmallPreviewBase64(imageBuffer, maxDim = 600) {
+  try {
+    const img = await Jimp.read(imageBuffer);
+    if (img.width > maxDim || img.height > maxDim) {
+      img.scaleToFit({ w: maxDim, h: maxDim });
+    }
+    const buf = await img.getBuffer("image/jpeg");
+    return `data:image/jpeg;base64,${buf.toString("base64")}`;
+  } catch (err) {
+    console.warn("Failed to create preview image, falling back to raw buffer:", err.message);
+    return `data:image/jpeg;base64,${imageBuffer.slice(0, 100 * 1024).toString("base64")}`;
+  }
+}
+
+/**
+ * Processes an input product image using optimized AI background removal
+ * and lightweight Jimp studio framing.
  *
  * @param {Buffer} imageBuffer - Raw image buffer uploaded by user
  * @param {string} inputMimeType - Input file mime type (e.g. "image/jpeg", "image/png")
  * @param {Object} options
  * @param {string} [options.backgroundColor="#FFFFFF"] - Hex code or 'transparent'
- * @param {number} [options.targetSize=1000] - Canvas dimensions (targetSize x targetSize)
+ * @param {number} [options.targetSize=800] - Canvas dimensions (targetSize x targetSize)
  * @param {boolean} [options.enhanceLighting=true] - Auto brightness & saturation
  * @param {string} [options.format="jpeg"] - "jpeg" or "png"
  * @returns {Promise<{ buffer: Buffer, mimeType: string, width: number, height: number }>}
@@ -36,44 +53,61 @@ function parseColorToJimpHex(colorStr) {
 export async function processImageStudio(imageBuffer, inputMimeType = "image/png", options = {}) {
   const {
     backgroundColor = "#FFFFFF",
-    targetSize = 1000,
+    targetSize = 800,
     enhanceLighting = true,
     format = "jpeg",
   } = options;
 
-  console.log("Starting local AI background removal (ONNX model)...");
+  console.log("Processing product image for Studio...");
 
-  // 1. Remove background locally via ONNX WebAssembly model
-  const mime = inputMimeType.includes("jpg") || inputMimeType.includes("jpeg") ? "image/jpeg" : "image/png";
-  const blob = new Blob([imageBuffer], { type: mime });
+  let fg;
+  let baseImg;
 
-  const bgRemovedBlob = await removeBackground(blob, {
-    output: {
-      type: "image/png",
-      quality: 0.95,
-    },
-  });
+  try {
+    baseImg = await Jimp.read(imageBuffer);
+    // Pre-downscale large camera photos to max 800px to avoid high memory/CPU usage
+    if (baseImg.width > 800 || baseImg.height > 800) {
+      baseImg.scaleToFit({ w: 800, h: 800 });
+    }
+    const preprocessedBuf = await baseImg.getBuffer("image/png");
 
-  const bgRemovedBuffer = Buffer.from(await bgRemovedBlob.arrayBuffer());
-  console.log("Background removal complete. Applying studio framing & enhancement...");
-
-  // 2. Load foreground object in Jimp
-  const fg = await Jimp.read(bgRemovedBuffer);
-
-  // 3. Apply studio lighting & color enhancement directly to foreground product if enabled
-  if (enhanceLighting && typeof fg.color === "function") {
-    fg.color([
-      { apply: "lighten", params: [4] },
-      { apply: "saturate", params: [8] },
-    ]);
+    // Attempt AI background removal with safe fallback
+    try {
+      console.log("Attempting local AI background removal...");
+      const blob = new Blob([preprocessedBuf], { type: "image/png" });
+      const bgRemovedBlob = await removeBackground(blob, {
+        output: { type: "image/png", quality: 0.9 },
+      });
+      const bgRemovedBuffer = Buffer.from(await bgRemovedBlob.arrayBuffer());
+      fg = await Jimp.read(bgRemovedBuffer);
+      console.log("Background removal complete.");
+    } catch (bgErr) {
+      console.warn("Background removal skipped/failed (using fallback studio framing):", bgErr.message);
+      fg = baseImg;
+    }
+  } catch (err) {
+    console.error("Failed to load input image buffer:", err.message);
+    throw err;
   }
 
-  // 4. Scale product down to fit inner target size maintaining aspect ratio (15% margin)
+  // Apply lighting enhancement if requested
+  if (enhanceLighting && typeof fg.color === "function") {
+    try {
+      fg.color([
+        { apply: "lighten", params: [4] },
+        { apply: "saturate", params: [8] },
+      ]);
+    } catch (e) {
+      // Ignore color operation error on fallback images
+    }
+  }
+
+  // Scale product to fit inside target studio canvas with 15% padding
   const paddingPercent = 0.15;
   const innerSize = Math.round(targetSize * (1 - paddingPercent * 2));
   fg.scaleToFit({ w: innerSize, h: innerSize });
 
-  // 5. Create studio canvas with chosen background color
+  // Create studio canvas with chosen background color
   const bgHex = parseColorToJimpHex(backgroundColor);
   const studioCanvas = new Jimp({ width: targetSize, height: targetSize, color: bgHex });
 
@@ -82,12 +116,12 @@ export async function processImageStudio(imageBuffer, inputMimeType = "image/png
   const offsetY = Math.round((targetSize - fg.height) / 2);
   studioCanvas.composite(fg, offsetX, offsetY);
 
-  // 6. Export output buffer
+  // Export compressed output buffer
   const isTransparent = backgroundColor === "transparent" || backgroundColor === "none" || format === "png";
   const outputMime = isTransparent ? "image/png" : "image/jpeg";
   const finalBuffer = await studioCanvas.getBuffer(outputMime);
 
-  console.log("Image studio processing complete. Output size:", finalBuffer.length, "bytes.");
+  console.log("Image studio processing complete. Compressed output size:", finalBuffer.length, "bytes.");
 
   return {
     buffer: finalBuffer,

@@ -35,7 +35,11 @@ export default function SellerPage() {
       }
       setResult(data);
     } catch (err) {
-      setError(err.message);
+      if (err.message === "Failed to fetch" || err.name === "TypeError") {
+        setError("Unable to connect to backend server. If accessing the deployed app on Render/Vercel, the backend server may be waking up from a cold start or timed out on upload. Please wait a few seconds and try submitting again.");
+      } else {
+        setError(err.message);
+      }
     } finally {
       setIsLoading(false);
     }

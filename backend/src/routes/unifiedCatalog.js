@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { generateListingFromVoiceNote } from "../services/geminiService.js";
-import { processImageStudio } from "../services/imageStudioService.js";
+import { processImageStudio, createSmallPreviewBase64 } from "../services/imageStudioService.js";
 import { buildPricingBlock } from "../services/pricingService.js";
 
 const router = Router();
@@ -77,11 +77,14 @@ router.post(
     // Handle Image Studio result
     if (imageResult.status === "fulfilled") {
       const resVal = imageResult.value;
+      const processedBase64 = `data:${resVal.mimeType};base64,${resVal.buffer.toString("base64")}`;
+      const originalBase64 = imageFile
+        ? await createSmallPreviewBase64(imageFile.buffer, 600)
+        : null;
+
       studioData = {
-        processed_image: `data:${resVal.mimeType};base64,${resVal.buffer.toString("base64")}`,
-        original_image: imageFile
-          ? `data:${imageFile.mimetype || "image/jpeg"};base64,${imageFile.buffer.toString("base64")}`
-          : null,
+        processed_image: processedBase64,
+        original_image: originalBase64,
         mimeType: resVal.mimeType,
         width: resVal.width,
         height: resVal.height,
@@ -89,11 +92,13 @@ router.post(
         image_error: null,
       };
     } else {
+      const originalBase64 = imageFile
+        ? await createSmallPreviewBase64(imageFile.buffer, 600)
+        : null;
+
       studioData = {
         processed_image: null,
-        original_image: imageFile
-          ? `data:${imageFile.mimetype || "image/jpeg"};base64,${imageFile.buffer.toString("base64")}`
-          : null,
+        original_image: originalBase64,
         image_error: imageFile
           ? `Image Studio processing failed: ${imageResult.reason?.message}`
           : "No image uploaded",
