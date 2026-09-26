@@ -69,7 +69,7 @@ export default function SellerPage() {
         <p>{t("sellerPageSubtitle")}</p>
       </div>
 
-      {/* Stats row */}
+      {/* Stats row
       <div className="stat-row">
         <div className="stat-card">
           <div className="stat-label">AI Models</div>
@@ -83,7 +83,7 @@ export default function SellerPage() {
           <div className="stat-label">Languages Supported</div>
           <div className="stat-value">All Indian</div>
         </div>
-      </div>
+      </div> */}
 
       {/* Success banner */}
       {postedProduct && (

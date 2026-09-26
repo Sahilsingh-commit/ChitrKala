@@ -19,8 +19,8 @@ export default function LoginPage() {
       {/* Hero / Brand Side */}
       <div className="login-hero">
         <h1>
-          India's Artisan<br />
-          AI <span className="accent">Cataloger</span>
+          ChitrKala Artisan<br />
+          AI <span className="accent">Studio</span>
         </h1>
         <p>{t("loginHeroDesc")}</p>
 

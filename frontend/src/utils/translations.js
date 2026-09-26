@@ -55,7 +55,7 @@ export const translations = {
     // Pages & Titles
     loginHeroTitle: "India's Artisan AI Cataloger",
     loginHeroDesc: "Speak your craft in any regional language — ChitrKala.AI transforms it into a studio-quality listing with professional images, bilingual descriptions, and fair market pricing.",
-    sellerPageTitle: "Artisan AI Studio",
+    sellerPageTitle: "ChitrKala Artisan AI Studio",
     sellerPageSubtitle: "Upload a product photo and describe it in your regional language — get a studio-quality listing with bilingual descriptions and fair market pricing in seconds.",
     buyerPageTitle: "Artisan Marketplace",
     buyerPageSubtitle: "Discover authentic handmade crafts from regional Indian artisans — direct from maker to buyer.",
