@@ -8,7 +8,11 @@ An AI-powered web app that turns a product photo and a voice note into a profess
 
 ## 🎥 Demo
 
-**Video walkthrough:** _[coming soon]_
+youtube link: https://youtu.be/SaCzye2A9PM?si=1fNBSBXAWnn_xQIb
+
+## Prototype 
+
+website:https://chitrkala-metric.vercel.app/
 
 ---
 
