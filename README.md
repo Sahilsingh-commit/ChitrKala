@@ -14,6 +14,19 @@ youtube link: https://youtu.be/SaCzye2A9PM?si=1fNBSBXAWnn_xQIb
 
 website:https://chitrkala-metric.vercel.app/
 
+## Quick overivew
+**Login Dashboard
+<img width="1920" height="1080" alt="Screenshot 2026-09-27 221120" src="https://github.com/user-attachments/assets/87f77254-e760-4647-9b90-41eb0e4bc68b" />
+
+**Dashboard for Artisan
+<img width="1920" height="1080" alt="Screenshot 2026-09-27 221137" src="https://github.com/user-attachments/assets/d21c9bf4-b16d-4702-ab4f-53be068d9073" />
+
+**After processing of images and voice note it converted into e-commerce ready product listing
+<img width="1298" height="1015" alt="Screenshot 2026-09-25 201402" src="https://github.com/user-attachments/assets/bc0b98bb-acf8-4fd2-ac65-ccc0d3acfc4a" />
+
+**Marketplace-For Buyers
+<img width="1920" height="1080" alt="Screenshot 2026-09-27 221103" src="https://github.com/user-attachments/assets/17b7f977-4688-4cea-a51d-9960f5e70978" />
+
 ---
 
 ## 📋 The Problem
